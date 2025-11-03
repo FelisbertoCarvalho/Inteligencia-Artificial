@@ -1,0 +1,99 @@
+;; PROJECTO ;;; puzzle.lisp
+;;; Projeto Solitário - Inteligência Artificial 2025/2026
+;;; Autor: Felisberto de Carvalho, Tiago Gomes, Filipe Patricio
+;;; Descrição: Representação do tabuleiro e operadores do Solitário.
+
+;; valor no código: 1 - significado: há um pino
+;; valor no código: 0 - significado: casa vazia
+;; valor no código: nil - significado: fora do tabuleiro
+
+
+;;; Representação do tabuleiro inicial
+(defun tabuleiro-inicial ()
+  '((nil nil 1 1 1 nil nil)
+    (nil nil 1 1 1 nil nil)
+    (1 1 1 1 1 1 1)
+    (1 1 1 0 1 1 1)
+    (1 1 1 1 1 1 1)
+    (nil nil 1 1 1 nil nil)
+    (nil nil 1 1 1 nil nil)))
+
+
+;;; Retorna o n-ésimo elemento de uma lista (recursivamente)
+(defun get-nth (n lst)
+  (if (zerop n)
+      (car lst)
+      (get-nth (1- n) (cdr lst))))
+
+;;; Substitui o elemento na posição n de uma lista (recursivamente)
+(defun set-nth (n new-val lst)
+  (if (zerop n)
+      (cons new-val (cdr lst))
+      (cons (car lst) (set-nth (1- n) new-val (cdr lst)))))
+
+;;; Acede a uma posição (linha, coluna)
+(defun get-pos (linha coluna tab)
+  (if (or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
+      nil
+      (let ((linha-val (get-nth (1- linha) tab)))
+        (if (null linha-val)
+            nil
+            (get-nth (1- coluna) linha-val)))))
+
+
+;;; Substitui um valor numa posição (linha, coluna)
+(defun set-pos (linha coluna new-val tab)
+  (if (or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
+      tab  ; devolve o tabuleiro inalterado
+      (if (= linha 1)
+          (cons (set-nth (1- coluna) new-val (car tab)) (cdr tab))
+          (cons (car tab) (set-pos (1- linha) coluna new-val (cdr tab))))))
+
+
+;;; Verifica se uma posição (linha, coluna) é válida no tabuleiro
+(defun pos-valida? (linha coluna tab)
+  (cond
+    ;; fora dos limites (menor que 1 ou maior que 7)
+    ((or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
+     nil)
+    ;; posição é nil (fora da cruz)
+    ((null (get-pos linha coluna tab))
+     nil)
+    ;; caso contrário, é válida
+    (t t)))
+
+
+;;(get-pos 4 4 (tabuleiro-inicial))  ; devolve 0 (centro vazio)
+;;(get-pos 3 3 (tabuleiro-inicial))  ; devolve 1 (tem pino)
+;;(set-pos 3 3 0 (tabuleiro-inicial)) ; cria um novo tabuleiro com (3,3) vazio
+;;(get-pos 8 8 (tabuleiro-inicial)) ; => NIL
+;;(get-pos 1 1 (tabuleiro-inicial)) ; => NIL (fora da cruz)
+;;(get-pos 4 4 (tabuleiro-inicial)) ; => 0 (centro vazio)
+
+(defun capture-right (linha coluna tab)
+  "Executa o movimento Captura à Direita, se possível, devolvendo o novo tabuleiro."
+  (if (and
+        ;; todas as posições envolvidas são válidas
+        (pos-valida? linha coluna tab)
+        (pos-valida? linha (+ coluna 1) tab)
+        (pos-valida? linha (+ coluna 2) tab)
+        ;; condições do movimento
+        (= (get-pos linha coluna tab) 1)     ; origem tem pino
+        (= (get-pos linha (+ coluna 1) tab) 1) ; pino a ser comido
+        (= (get-pos linha (+ coluna 2) tab) 0)) ; destino vazio
+      ;; então cria novo tabuleiro recursivamente
+      (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
+             (tab2 (set-pos linha (+ coluna 1) 0 tab1))      ; remove o pino do meio
+             (tab3 (set-pos linha (+ coluna 2) 1 tab2)))     ; destino ganha pino
+        tab3)
+      ;; caso contrário, devolve o mesmo tabuleiro (movimento inválido)
+      tab))
+
+
+;; testar no repl
+;;(setq t1 (tabuleiro-inicial))
+;;; mover o pino da posição (4,2) para (4,4)
+;;(setq t2 (cd 4 2 t1))
+;;(get-pos 4 2 t2)  ; 0 -> origem vazia
+;;(get-pos 4 3 t2)  ; 0 -> pino comido
+;;(get-pos 4 4 t2)  ; 1 -> destino agora tem pino
