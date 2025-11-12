@@ -70,7 +70,7 @@
 ;;(get-pos 1 1 (tabuleiro-inicial)) ; => NIL (fora da cruz)
 ;;(get-pos 4 4 (tabuleiro-inicial)) ; => 0 (centro vazio)
 
-(defun capture-right (linha coluna tab)
+(defun cr (linha coluna tab)
   "Executa o movimento Captura à Direita, se possível, devolvendo o novo tabuleiro."
   (if (and
         ;; todas as posições envolvidas são válidas
@@ -93,7 +93,192 @@
 ;; testar no repl
 ;;(setq t1 (tabuleiro-inicial))
 ;;; mover o pino da posição (4,2) para (4,4)
-;;(setq t2 (cd 4 2 t1))
+;;(setq t2 (cr 4 2 t1))
 ;;(get-pos 4 2 t2)  ; 0 -> origem vazia
 ;;(get-pos 4 3 t2)  ; 0 -> pino comido
 ;;(get-pos 4 4 t2)  ; 1 -> destino agora tem pino
+
+
+(defun cl (linha coluna tab)
+  "Executa o movimento Captura à Esquerda, se possível, devolvendo o novo tabuleiro."
+  (if (and
+        ;; todas as posições envolvidas são válidas
+        (pos-valida? linha coluna tab)
+        (pos-valida? linha (- coluna 1) tab)
+        (pos-valida? linha (- coluna 2) tab)
+        ;; condições do movimento
+        (= (get-pos linha coluna tab) 1)       ; origem tem pino
+        (= (get-pos linha (- coluna 1) tab) 1)  ; pino a ser comido
+        (= (get-pos linha (- coluna 2) tab) 0)) ; destino vazio
+      ;; movimento válido devolve novo tabuleiro
+      (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
+             (tab2 (set-pos linha (- coluna 1) 0 tab1))      ; remove o pino do meio
+             (tab3 (set-pos linha (- coluna 2) 1 tab2)))     ; destino ganha pino
+        tab3)
+      ;; movimento inválido  devolve o mesmo tabuleiro
+      tab))
+
+;; (setq t1 (tabuleiro-inicial))
+;; (setq t2 (ce 4 6 t1))
+;; (get-pos 4 6 t2)  ; 0  origem vazia
+;; (get-pos 4 5 t2)  ; 0  pino comido
+;; (get-pos 4 4 t2)  ; 1  destino ganhou o pino
+
+
+(defun ct (linha coluna tab)
+  "Executa o movimento Captura Acima, se possível, devolvendo o novo tabuleiro."
+  (if (and
+        ;; posições válidas
+        (pos-valida? linha coluna tab)
+        (pos-valida? (- linha 1) coluna tab)
+        (pos-valida? (- linha 2) coluna tab)
+        ;; condições do movimento
+        (= (get-pos linha coluna tab) 1)       ; origem com pino
+        (= (get-pos (- linha 1) coluna tab) 1) ; pino a ser comido
+        (= (get-pos (- linha 2) coluna tab) 0)) ; destino vazio
+      ;; aplica as mudanças recursivamente
+      (let* ((tab1 (set-pos linha coluna 0 tab))            ; origem vazia
+             (tab2 (set-pos (- linha 1) coluna 0 tab1))     ; remove o pino do meio
+             (tab3 (set-pos (- linha 2) coluna 1 tab2)))    ; destino ganha o pino
+        tab3)
+      ;; movimento inválido
+      tab))
+
+
+;;(get-pos 6 4 (tabuleiro-inicial)) ; 1  pino que vai mover
+;;(get-pos 5 4 (tabuleiro-inicial)) ; 1  pino a ser comido
+;;(get-pos 4 4 (tabuleiro-inicial)) ; 0  destino vazio
+;;(setq t1 (tabuleiro-inicial))
+;;(setq t2 (cc 6 4 t1))
+;;(get-pos 6 4 t2) ; 0  origem vazia
+;;(get-pos 5 4 t2) ; 0  pino comido
+;;(get-pos 4 4 t2) ; 1  destino com pino
+
+
+(defun cb (linha coluna tab)
+  "Executa o movimento Captura Abaixo, se possível, devolvendo o novo tabuleiro."
+  (if (and
+        ;; posições válidas
+        (pos-valida? linha coluna tab)
+        (pos-valida? (+ linha 1) coluna tab)
+        (pos-valida? (+ linha 2) coluna tab)
+        ;; condições do movimento
+        (= (get-pos linha coluna tab) 1)        ; origem com pino
+        (= (get-pos (+ linha 1) coluna tab) 1)  ; pino a ser comido
+        (= (get-pos (+ linha 2) coluna tab) 0)) ; destino vazio
+      ;; aplica as mudanças recursivamente
+      (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
+             (tab2 (set-pos (+ linha 1) coluna 0 tab1))      ; remove o pino do meio
+             (tab3 (set-pos (+ linha 2) coluna 1 tab2)))     ; destino ganha pino
+        tab3)
+      ;; movimento inválido  devolve o mesmo tabuleiro
+      tab))
+
+
+;;(setq t1 (tabuleiro-inicial))
+;;(setq t2 (cb 2 4 t1))
+;;(get-pos 2 4 t2) ; 0  origem vazia
+;;(get-pos 3 4 t2) ; 0  pino comido
+;;(get-pos 4 4 t2) ; 1  destino com pino
+
+
+(defun movimentos-validos-de-pos (linha coluna tab)
+  "Retorna lista de movimentos válidos (listas) a partir de (linha,coluna)."
+  (let ((cr-valid (and (pos-valida? linha coluna tab)
+                       (pos-valida? linha (+ coluna 1) tab)
+                       (pos-valida? linha (+ coluna 2) tab)
+                       (= (get-pos linha coluna tab) 1)
+                       (= (get-pos linha (+ coluna 1) tab) 1)
+                       (= (get-pos linha (+ coluna 2) tab) 0)))
+        (cl-valid (and (pos-valida? linha coluna tab)
+                       (pos-valida? linha (- coluna 1) tab)
+                       (pos-valida? linha (- coluna 2) tab)
+                       (= (get-pos linha coluna tab) 1)
+                       (= (get-pos linha (- coluna 1) tab) 1)
+                       (= (get-pos linha (- coluna 2) tab) 0)))
+        (ct-valid (and (pos-valida? linha coluna tab)
+                       (pos-valida? (- linha 1) coluna tab)
+                       (pos-valida? (- linha 2) coluna tab)
+                       (= (get-pos linha coluna tab) 1)
+                       (= (get-pos (- linha 1) coluna tab) 1)
+                       (= (get-pos (- linha 2) coluna tab) 0)))
+        (cb-valid (and (pos-valida? linha coluna tab)
+                       (pos-valida? (+ linha 1) coluna tab)
+                       (pos-valida? (+ linha 2) coluna tab)
+                       (= (get-pos linha coluna tab) 1)
+                       (= (get-pos (+ linha 1) coluna tab) 1)
+                       (= (get-pos (+ linha 2) coluna tab) 0))))
+    (append
+      (if cr-valid (list (list 'cr linha coluna)) '())
+      (if cl-valid (list (list 'cl linha coluna)) '())
+      (if ct-valid (list (list 'ct linha coluna)) '())
+      (if cb-valid (list (list 'cb linha coluna)) '()))))
+
+
+(defun aplica-movimento (mov tab)
+  "Aplica mov (por exemplo '(cd 4 2)) ao tab e devolve o novo tab.
+Se mov tiver um tipo desconhecido, devolve NIL (não deve acontecer)."
+  (let ((tipo (first mov))
+        (linha (second mov))
+        (coluna (third mov)))
+    (cond
+      ((eq tipo 'cr) (cr linha coluna tab))
+      ((eq tipo 'cl) (cl linha coluna tab))
+      ((eq tipo 'ct) (ct linha coluna tab))
+      ((eq tipo 'cb) (cb linha coluna tab))
+      (t (error "Tipo de movimento desconhecido: ~A" tipo)))))
+
+
+(defun gera-sucessores (tab)
+  "Devolve lista de pares (mov . novo-tab) com todos os movimentos válidos do tab."
+  (labels
+      ;; gera para colunas de 1..7 recursivamente
+      ((iter-cols (linha coluna acc)
+         (cond
+           ((> coluna 7) acc)
+           (t
+            (let* ((movs (movimentos-validos-de-pos linha coluna tab))
+                   (pares (mapcar (lambda (m) (cons m (aplica-movimento m tab))) movs))
+                   (novo-acc (append acc pares)))
+              (iter-cols linha (1+ coluna) novo-acc))))))
+    ;; gera para linhas de 1..7 recursivamente, reutilizando iter-cols
+    (labels ((iter-linhas (linha acc)
+               (cond
+                 ((> linha 7) acc)
+                 (t (iter-linhas (1+ linha) (iter-cols linha 1 acc))))))
+      (iter-linhas 1 '()))))
+
+
+;; (setq t0 (tabuleiro-inicial))
+;; (setq suc (gera-sucessores t0))
+;; (length suc) ; número de movimentos válidos no estado inicial
+;; (first suc)  ; primeiro par (mov . novo-tab)
+;; (car (first suc)) ; o movimento (por ex. (cd 4 2))
+;; (cdr (first suc)) ; o novo tabuleiro após esse movimento
+
+
+
+
+(defun print-linha (linha)
+  "Imprime uma linha do tabuleiro, convertendo 1 , 0 , nil espaço."
+  (cond
+    ((null linha) (format t "~%")) ; fim da linha
+    (t
+     (let ((celula (car linha)))
+       (cond
+         ((null celula) (format t "   "))   ; fora da cruz
+         ((= celula 1) (format t " X "))   ; pino
+         ((= celula 0) (format t " O "))))
+     (print-linha (cdr linha))))) ; recursão para o resto da linha
+     
+
+(defun print-tabuleiro (tab)
+  "Imprime o tabuleiro completo de forma visual."
+  (cond
+    ((null tab) (format t "~%")) ; fim das linhas
+    (t
+     (print-linha (car tab))     ; imprime primeira linha
+     (print-tabuleiro (cdr tab))))) ; recursão para as restantes
+
+
+;; (print-tabuleiro (tabuleiro-inicial))
