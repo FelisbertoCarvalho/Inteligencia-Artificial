@@ -282,3 +282,292 @@ Se mov tiver um tipo desconhecido, devolve NIL (não deve acontecer)."
 
 
 ;; (print-tabuleiro (tabuleiro-inicial))
+
+
+(defun conta-pinos-linha (linha)
+  (cond
+    ((null linha) 0)
+    ((null (car linha)) (conta-pinos-linha (cdr linha)))
+    ((= (car linha) 1) (+ 1 (conta-pinos-linha (cdr linha))))
+    (t (conta-pinos-linha (cdr linha)))))
+
+
+(defun conta-pinos (tab)
+  (cond
+    ((null tab) 0)
+    (t (+ (conta-pinos-linha (car tab))
+          (conta-pinos (cdr tab))))))
+
+
+(defun objetivo? (tab)
+  (= (conta-pinos tab) 1))
+
+
+(defun o (tab)
+  (length (gera-sucessores tab)))
+
+
+(defun h1 (tab)
+  (/ 1 (+ (o tab) 1)))
+
+(h1 (tabuleiro-inicial))
+
+
+
+(defun estados-iguais? (a b)
+  (equal a b))
+
+(defun estado-visitado? (estado visitados)
+  (cond
+    ((null visitados) nil)
+    ((estados-iguais? estado (car visitados)) t)
+    (t (estado-visitado? estado (cdr visitados)))))
+
+
+
+(defun bfs-aux (fila visitados)
+  (cond
+    ;; 1. Se a fila está vazia, não há solução
+    ((null fila)
+     nil)
+
+    (t
+     ;; retirar o primeiro elemento da fila
+     (let* ((nodo (car fila))
+            (estado (first nodo))
+            (caminho (second nodo)))
+
+       ;; 2. Se este estado já foi visitado, ignora e continua
+       (if (estado-visitado? estado visitados)
+           (bfs-aux (cdr fila) visitados)
+
+         ;; 3. Se o estado atual é objetivo  devolve caminho
+         (if (objetivo? estado)
+             (reverse caminho)
+
+           ;; 4. Caso contrário, gerar sucessores
+           ;; Cada sucessor é um par (mov . novo-estado)
+           (let ((sucessores (gera-sucessores estado)))
+
+             ;; converter sucessores em nós válidos
+             (let ((novos-nodos
+                     (mapcar
+                       (lambda (par)
+                         (let ((mov (car par))
+                               (novo-estado (cdr par)))
+                           (list novo-estado (cons mov caminho))))
+                       sucessores)))
+
+               ;; 5. Chamada recursiva ao BFS:
+               ;; - adiciona novos nós ao fim da fila
+               ;; - marca estado como visitado
+               (bfs-aux
+                 (append (cdr fila) novos-nodos)
+                 (cons estado visitados))))))))))
+
+
+(defun bfs (inicial)
+  "Procura uma solução usando Breadth-First Search.
+   Devolve a sequência de movimentos até ao estado objetivo."
+  (bfs-aux (list (list inicial '())) '()))
+
+
+
+
+
+
+
+
+;;; LIMITADA
+
+(defun bfs-limitada (inicial max-prof)
+  "BFS com limite de profundidade max-prof.
+   Devolve a sequência de movimentos ou :fail."
+  (bfs-limitada-aux
+    (list (list inicial '() 0))  ; fila inicial (estado, caminho, prof=0)
+    '()
+    max-prof))
+
+
+
+
+(defun bfs-limitada-aux (fila visitados max-prof)
+  (cond
+    ((null fila) :fail)   ; nada por explorar
+
+    (t
+     (let* ((nodo (car fila))
+            (estado (first nodo))
+            (caminho (second nodo))
+            (prof (third nodo)))
+
+       ;; já visitado  ignorar
+       (if (estado-visitado? estado visitados)
+           (bfs-limitada-aux (cdr fila) visitados max-prof)
+
+         ;; objetivo?
+         (if (objetivo? estado)
+             (reverse caminho)
+
+           ;; limite atingido  não expandir este nó
+           (if (>= prof max-prof)
+               (bfs-limitada-aux (cdr fila)
+                                 (cons estado visitados)
+                                 max-prof)
+
+             ;; expandir sucessores
+             (let* ((sucessores (gera-sucessores estado))
+                    (novos-nodos
+                      (mapcar
+                        (lambda (par)
+                          (let ((mov (car par))
+                                (novo-estado (cdr par)))
+                            (list novo-estado
+                                  (cons mov caminho)
+                                  (+ prof 1))))
+                        sucessores)))
+
+               ;; chamada recursiva
+               (bfs-limitada-aux
+                 (append (cdr fila) novos-nodos)
+                 (cons estado visitados)
+                 max-prof)))))))))
+
+
+;;; DFS LIMITADA
+
+(defun dfs-limitada (estado limite)
+  "Interface: devolve caminho ou :fail."
+  (dfs-limitada-aux estado '() 0 limite '()))
+
+(defun dfs-limitada-aux (estado caminho prof limite visitados)
+  (cond
+    ;; objetivo
+    ((objetivo? estado)
+     (reverse caminho))
+
+    ;; limite atingido
+    ((>= prof limite)
+     :limit)  ; sinaliza que parou por profundidade, não por falha total
+
+    ;; estado já visitado
+    ((estado-visitado? estado visitados)
+     :fail)
+
+    (t
+     ;; gerar sucessores
+     (let ((sucessores (gera-sucessores estado)))
+       (dfs-l-list sucessores caminho prof limite (cons estado visitados))))))
+
+
+(defun dfs-l-list (lista-sucessores caminho prof limite visitados)
+  (cond
+    ((null lista-sucessores) :fail)
+    (t
+     (let* ((par (car lista-sucessores))
+            (mov (car par))
+            (novo-est (cdr par))
+            (novo-caminho (cons mov caminho)))
+
+       (let ((resultado
+              (dfs-limitada-aux novo-est
+                                novo-caminho
+                                (+ prof 1)
+                                limite
+                                visitados)))
+         (if (or (not (eq resultado :fail))
+                 (eq resultado :limit))
+             resultado
+           (dfs-l-list (cdr lista-sucessores)
+                       caminho
+                       prof
+                       limite
+                       visitados)))))))
+
+
+;;; A*
+
+(defun a* (inicial)
+  (a*-aux (list (list inicial '() 0 (h2 inicial))) '()))
+
+
+(defun a*-aux (abertos fechados)
+  ;; se não há mais nós a expandir  falha
+  (cond
+    ((null abertos) :fail)
+
+    (t
+     ;; ordenar a lista aberta pelo menor f
+     (let* ((ordenados
+             (sort (copy-list abertos)
+                   (lambda (n1 n2)
+                     (< (+ (third n1) (fourth n1))  ; g+h
+                        (+ (third n2) (fourth n2))))))
+
+            (nodo (car ordenados))
+            (estado (first nodo))
+            (caminho (second nodo))
+            (g (third nodo)))
+
+       ;; se estado já explorado, ignora
+       (if (estado-visitado? estado fechados)
+           (a*-aux (cdr ordenados) fechados)
+
+         ;; se objetivo  devolve caminho
+         (if (objetivo? estado)
+             (reverse caminho)
+
+           ;; gerar sucessores
+           (let* ((sucessores (gera-sucessores estado))
+                  (novos-nos
+                    (mapcar
+                      (lambda (par)
+                        (let ((mov (car par))
+                              (novo-est (cdr par)))
+                          (list novo-est
+                                (cons mov caminho)
+                                (+ g 1)
+                                (h2 novo-est))))
+                      sucessores)))
+
+             ;; recursão com:
+             ;; - adicionar sucessores aos abertos
+             ;; - estado atual passa para fechados
+             (a*-aux
+               (append (cdr ordenados) novos-nos)
+               (cons estado fechados)))))))))
+
+
+(defun h-pinos (tab)
+  (let ((p (conta-pinos tab)))
+    (max 0 (- p 1))))
+
+
+(defun pinos-bloqueados (tab)
+  (labels ((conta-na-pos (linha coluna)
+             (cond
+               ((or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7)) 0)
+               ((null (get-pos linha coluna tab)) 0)
+               ((= (get-pos linha coluna tab) 0) 0)
+               ((null (movimentos-validos-de-pos linha coluna tab)) 1)
+               (t 0))))
+
+    (labels ((aux-linhas (l)
+               (if (> l 7) 0
+                 (+ (aux-colunas l 1)
+                    (aux-linhas (+ l 1)))))
+
+             (aux-colunas (l c)
+               (if (> c 7) 0
+                 (+ (conta-na-pos l c)
+                    (aux-colunas l (+ c 1))))))
+
+      (aux-linhas 1))))
+
+(defun h2 (tab)
+  (+ (h-pinos tab)
+     (pinos-bloqueados tab)))
+
+
+
+
