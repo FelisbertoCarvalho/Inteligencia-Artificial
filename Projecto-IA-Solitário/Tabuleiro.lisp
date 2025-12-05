@@ -1,6 +1,6 @@
 ;; PROJECTO ;;; puzzle.lisp
 ;;; Projeto Solitário - Inteligência Artificial 2025/2026
-;;; Autor: Felisberto de Carvalho, Tiago Gomes, Filipe Patricio
+;;; Autor: Felisberto de Carvalho, Tiago Campos, Filipe Patricio
 ;;; Descrição: Representação do tabuleiro e operadores do Solitário.
 
 ;; valor no código: 1 - significado: há um pino
@@ -18,6 +18,15 @@
     (nil nil 1 1 1 nil nil)
     (nil nil 1 1 1 nil nil)))
 
+;;; Representação de um tabuleiro simples (tabuleiro A)
+(defun tabuleiro-a ()
+    '((nil nil 0 0 0 nil nil)
+    (nil nil 0 0 0 nil nil)
+    (0 0 0 0 0 0 0)
+    (0 0 0 0 0 0 0)
+    (0 0 0 0 1 1 0)
+    (nil nil 0 1 0 nil nil)
+    (nil nil 0 0 0 nil nil)))
 
 ;;; Retorna o n-ésimo elemento de uma lista (recursivamente)
 (defun get-nth (n lst)
