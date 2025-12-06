@@ -1,4 +1,4 @@
-;; PROJECTO ;;; puzzle.lisp
+;;; PROJECTO ;;; puzzle.lisp
 ;;; Projeto Solitário - Inteligência Artificial 2025/2026
 ;;; Autor: Felisberto de Carvalho, Tiago Campos, Filipe Patricio
 ;;; Descrição: Representação do tabuleiro e operadores do Solitário.
