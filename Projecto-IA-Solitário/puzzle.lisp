@@ -1,14 +1,14 @@
 ;; PROJECTO ;;; puzzle.lisp
-;;; Projeto Solit·rio - InteligÍncia Artificial 2025/2026
+;;; Projeto Solit√°rio - Intelig√™ncia Artificial 2025/2026
 ;;; Autor: Felisberto de Carvalho, Tiago Gomes, Filipe Patricio
-;;; DescriÁ„o: RepresentaÁ„o do tabuleiro e operadores do Solit·rio.
+;;; Descri√ß√£o: Representa√ß√£o do tabuleiro e operadores do Solit√°rio.
 
-;; valor no cÛdigo: 1 - significado: h· um pino
-;; valor no cÛdigo: 0 - significado: casa vazia
-;; valor no cÛdigo: nil - significado: fora do tabuleiro
+;; valor no c√≥digo: 1 - significado: h√° um pino
+;; valor no c√≥digo: 0 - significado: casa vazia
+;; valor no c√≥digo: nil - significado: fora do tabuleiro
 
 
-;;; RepresentaÁ„o do tabuleiro inicial
+;;; Representa√ß√£o do tabuleiro inicial
 (defun tabuleiro-inicial ()
   '((nil nil 1 1 1 nil nil)
     (nil nil 1 1 1 nil nil)
@@ -69,19 +69,19 @@
     (nil nil 0 0 0 nil nil)))
 
 
-;;; Retorna o n-Èsimo elemento de uma lista (recursivamente)
+;;; Retorna o n-√©simo elemento de uma lista (recursivamente)
 (defun get-nth (n lst)
   (if (zerop n)
       (car lst)
       (get-nth (1- n) (cdr lst))))
 
-;;; Substitui o elemento na posiÁ„o n de uma lista (recursivamente)
+;;; Substitui o elemento na posi√ß√£o n de uma lista (recursivamente)
 (defun set-nth (n new-val lst)
   (if (zerop n)
       (cons new-val (cdr lst))
       (cons (car lst) (set-nth (1- n) new-val (cdr lst)))))
 
-;;; Acede a uma posiÁ„o (linha, coluna)
+;;; Acede a uma posi√ß√£o (linha, coluna)
 (defun get-pos (linha coluna tab)
   (if (or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
       nil
@@ -91,7 +91,7 @@
             (get-nth (1- coluna) linha-val)))))
 
 
-;;; Substitui um valor numa posiÁ„o (linha, coluna)
+;;; Substitui um valor numa posi√ß√£o (linha, coluna)
 (defun set-pos (linha coluna new-val tab)
   (if (or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
       tab  ; devolve o tabuleiro inalterado
@@ -100,16 +100,16 @@
           (cons (car tab) (set-pos (1- linha) coluna new-val (cdr tab))))))
 
 
-;;; Verifica se uma posiÁ„o (linha, coluna) È v·lida no tabuleiro
+;;; Verifica se uma posi√ß√£o (linha, coluna) √© v√°lida no tabuleiro
 (defun pos-valida? (linha coluna tab)
   (cond
     ;; fora dos limites (menor que 1 ou maior que 7)
     ((or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
      nil)
-    ;; posiÁ„o È nil (fora da cruz)
+    ;; posi√ß√£o √© nil (fora da cruz)
     ((null (get-pos linha coluna tab))
      nil)
-    ;; caso contr·rio, È v·lida
+    ;; caso contr√°rio, √© v√°lida
     (t t)))
 
 
@@ -122,25 +122,25 @@
 
 (defun cr (linha coluna tab)
   (if (and
-        ;; todas as posiÁıes envolvidas s„o v·lidas
+        ;; todas as posi√ß√µes envolvidas s√£o v√°lidas
         (pos-valida? linha coluna tab)
         (pos-valida? linha (+ coluna 1) tab)
         (pos-valida? linha (+ coluna 2) tab)
-        ;; condiÁıes do movimento
+        ;; condi√ß√µes do movimento
         (= (get-pos linha coluna tab) 1)     ; origem tem pino
         (= (get-pos linha (+ coluna 1) tab) 1) ; pino a ser comido
         (= (get-pos linha (+ coluna 2) tab) 0)) ; destino vazio
-      ;; ent„o cria novo tabuleiro recursivamente
+      ;; ent√£o cria novo tabuleiro recursivamente
       (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
              (tab2 (set-pos linha (+ coluna 1) 0 tab1))      ; remove o pino do meio
              (tab3 (set-pos linha (+ coluna 2) 1 tab2)))     ; destino ganha pino
         tab3)
-      ;; caso contr·rio, devolve o mesmo tabuleiro (movimento inv·lido)
+      ;; caso contr√°rio, devolve o mesmo tabuleiro (movimento inv√°lido)
       tab))
 
 
 ;;(setq t1 (tabuleiro-inicial))
-;;; mover o pino da posiÁ„o (4,2) para (4,4)
+;;; mover o pino da posi√ß√£o (4,2) para (4,4)
 ;;(setq t2 (cr 4 2 t1))
 ;;(get-pos 4 2 t2)  ; 0 -> origem vazia
 ;;(get-pos 4 3 t2)  ; 0 -> pino comido
@@ -149,20 +149,20 @@
 
 (defun cl (linha coluna tab)
   (if (and
-        ;; todas as posiÁıes envolvidas s„o v·lidas
+        ;; todas as posi√ß√µes envolvidas s√£o v√°lidas
         (pos-valida? linha coluna tab)
         (pos-valida? linha (- coluna 1) tab)
         (pos-valida? linha (- coluna 2) tab)
-        ;; condiÁıes do movimento
+        ;; condi√ß√µes do movimento
         (= (get-pos linha coluna tab) 1)       ; origem tem pino
         (= (get-pos linha (- coluna 1) tab) 1)  ; pino a ser comido
         (= (get-pos linha (- coluna 2) tab) 0)) ; destino vazio
-      ;; movimento v·lido devolve novo tabuleiro
+      ;; movimento v√°lido devolve novo tabuleiro
       (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
              (tab2 (set-pos linha (- coluna 1) 0 tab1))      ; remove o pino do meio
              (tab3 (set-pos linha (- coluna 2) 1 tab2)))     ; destino ganha pino
         tab3)
-      ;; movimento inv·lido  devolve o mesmo tabuleiro
+      ;; movimento inv√°lido  devolve o mesmo tabuleiro
       tab))
 
 ;; (setq t1 (tabuleiro-inicial))
@@ -174,20 +174,20 @@
 
 (defun ct (linha coluna tab)
   (if (and
-        ;; posiÁıes v·lidas
+        ;; posi√ß√µes v√°lidas
         (pos-valida? linha coluna tab)
         (pos-valida? (- linha 1) coluna tab)
         (pos-valida? (- linha 2) coluna tab)
-        ;; condiÁıes do movimento
+        ;; condi√ß√µes do movimento
         (= (get-pos linha coluna tab) 1)       ; origem com pino
         (= (get-pos (- linha 1) coluna tab) 1) ; pino a ser comido
         (= (get-pos (- linha 2) coluna tab) 0)) ; destino vazio
-      ;; aplica as mudanÁas recursivamente
+      ;; aplica as mudan√ßas recursivamente
       (let* ((tab1 (set-pos linha coluna 0 tab))            ; origem vazia
              (tab2 (set-pos (- linha 1) coluna 0 tab1))     ; remove o pino do meio
              (tab3 (set-pos (- linha 2) coluna 1 tab2)))    ; destino ganha o pino
         tab3)
-      ;; movimento inv·lido
+      ;; movimento inv√°lido
       tab))
 
 
@@ -203,20 +203,20 @@
 
 (defun cb (linha coluna tab)
   (if (and
-        ;; posiÁıes v·lidas
+        ;; posi√ß√µes v√°lidas
         (pos-valida? linha coluna tab)
         (pos-valida? (+ linha 1) coluna tab)
         (pos-valida? (+ linha 2) coluna tab)
-        ;; condiÁıes do movimento
+        ;; condi√ß√µes do movimento
         (= (get-pos linha coluna tab) 1)        ; origem com pino
         (= (get-pos (+ linha 1) coluna tab) 1)  ; pino a ser comido
         (= (get-pos (+ linha 2) coluna tab) 0)) ; destino vazio
-      ;; aplica as mudanÁas recursivamente
+      ;; aplica as mudan√ßas recursivamente
       (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
              (tab2 (set-pos (+ linha 1) coluna 0 tab1))      ; remove o pino do meio
              (tab3 (set-pos (+ linha 2) coluna 1 tab2)))     ; destino ganha pino
         tab3)
-      ;; movimento inv·lido  devolve o mesmo tabuleiro
+      ;; movimento inv√°lido  devolve o mesmo tabuleiro
       tab))
 
 
@@ -273,7 +273,7 @@
       (t (error "Tipo de movimento desconhecido: ~A" tipo)))))
 
 
-"Devolve lista de pares (movimento . novo-tabuleiro) com todos os movimentos v·lidos do tabuleiro"
+"Devolve lista de pares (movimento . novo-tabuleiro) com todos os movimentos v√°lidos do tabuleiro"
 (defun gera-sucessores (tab)
   (labels
       ;; gera para colunas de 1..7 recursivamente
@@ -295,14 +295,14 @@
 
 ;; (setq t0 (tabuleiro-inicial))
 ;; (setq suc (gera-sucessores t0))
-;; (length suc) ; n˙mero de movimentos v·lidos no estado inicial
+;; (length suc) ; n√∫mero de movimentos v√°lidos no estado inicial
 ;; (first suc)  ; primeiro par (mov . novo-tab)
 ;; (car (first suc)) ; o movimento (por ex. (cd 4 2))
-;; (cdr (first suc)) ; o novo tabuleiro apÛs esse movimento
+;; (cdr (first suc)) ; o novo tabuleiro ap√≥s esse movimento
 
 
 
- "Imprime uma linha do tabuleiro, convertendo 1 , 0 , nil espaÁo."
+ "Imprime uma linha do tabuleiro, convertendo 1 , 0 , nil espa√ßo."
 (defun print-linha (linha)
   (cond
     ((null linha) (format t "~%")) ; fim da linha
@@ -312,7 +312,7 @@
          ((null celula) (format t "   "))   ; fora da cruz
          ((= celula 1) (format t " X "))   ; pino
          ((= celula 0) (format t " O "))))
-     (print-linha (cdr linha))))) ; recurs„o para o resto da linha
+     (print-linha (cdr linha))))) ; recurs√£o para o resto da linha
      
 
  "Imprime o tabuleiro completo de forma visual."
@@ -321,7 +321,7 @@
     ((null tab) (format t "~%")) ; fim das linhas
     (t
      (print-linha (car tab))     ; imprime primeira linha
-     (print-tabuleiro (cdr tab))))) ; recurs„o para as restantes
+     (print-tabuleiro (cdr tab))))) ; recurs√£o para as restantes
 
 
 ;; (print-tabuleiro (tabuleiro-inicial))
@@ -372,7 +372,7 @@
 
 (defun bfs-aux (fila visitados)
   (cond
-    ;; 1. Se a fila est· vazia, n„o h· soluÁ„o
+    ;; 1. Se a fila est√° vazia, n√£o h√° solu√ß√£o
     ((null fila)
      nil)
 
@@ -382,19 +382,19 @@
             (estado (first nodo))
             (caminho (second nodo)))
 
-       ;; 2. Se este estado j· foi visitado, ignora e continua
+       ;; 2. Se este estado j√° foi visitado, ignora e continua
        (if (estado-visitado? estado visitados)
            (bfs-aux (cdr fila) visitados)
 
-         ;; 3. Se o estado atual È objetivo  devolve caminho
+         ;; 3. Se o estado atual √© objetivo  devolve caminho
          (if (objetivo? estado)
              (reverse caminho)
 
-           ;; 4. Caso contr·rio, gerar sucessores
-           ;; Cada sucessor È um par (mov . novo-estado)
+           ;; 4. Caso contr√°rio, gerar sucessores
+           ;; Cada sucessor √© um par (mov . novo-estado)
            (let ((sucessores (gera-sucessores estado)))
 
-             ;; converter sucessores em nÛs v·lidos
+             ;; converter sucessores em n√≥s v√°lidos
              (let ((novos-nodos
                      (mapcar
                        (lambda (par)
@@ -404,7 +404,7 @@
                        sucessores)))
 
                ;; 5. Chamada recursiva ao BFS:
-               ;; - adiciona novos nÛs ao fim da fila
+               ;; - adiciona novos n√≥s ao fim da fila
                ;; - marca estado como visitado
                (bfs-aux
                  (append (cdr fila) novos-nodos)
@@ -428,9 +428,9 @@
 
     ;; limite atingido
     ((>= prof limite)
-     :limit)  ; sinaliza que parou por profundidade, n„o por falha total
+     :limit)  ; sinaliza que parou por profundidade, n√£o por falha total
 
-    ;; estado j· visitado
+    ;; estado j√° visitado
     ((estado-visitado? estado visitados)
      :fail)
 
@@ -472,7 +472,7 @@
 
 
 (defun a*-aux (abertos fechados)
-  ;; se n„o h· mais nÛs a expandir  falha
+  ;; se n√£o h√° mais n√≥s a expandir  falha
   (cond
     ((null abertos) :fail)
 
@@ -489,7 +489,7 @@
             (caminho (second nodo))
             (g (third nodo)))
 
-       ;; se estado j· explorado, ignora
+       ;; se estado j√° explorado, ignora
        (if (estado-visitado? estado fechados)
            (a*-aux (cdr ordenados) fechados)
 
@@ -510,7 +510,7 @@
                                 (h2 novo-est))))
                       sucessores)))
 
-             ;; recurs„o com:
+             ;; recurs√£o com:
              ;; - adicionar sucessores aos abertos
              ;; - estado atual passa para fechados
              (a*-aux
@@ -562,7 +562,7 @@
   (let ((resultado (ida*-dfs estado '() 0 limite '() most-positive-fixnum)))
     (cond
       ((consp resultado) resultado)  ; caminho encontrado
-      ((= resultado most-positive-fixnum) :fail) ; impossÌvel
+      ((= resultado most-positive-fixnum) :fail) ; imposs√≠vel
       (t (ida*-iter estado resultado))))) ; aumentar limite e repetir
 
 
@@ -571,7 +571,7 @@
   (let* ((h (h2 estado))
          (f (+ g h)))  ; custo total
     (cond
-      ;; 1. Se f > limite  este estado n„o pode ser expandido
+      ;; 1. Se f > limite  este estado n√£o pode ser expandido
       ((> f limite)
        (min melhor-ultrapassou f))
 
@@ -592,10 +592,10 @@
 
 
 
-;;Expans„o dos sucessores, um por um
+;;Expans√£o dos sucessores, um por um
 (defun ida*-dfs-expand (sucessores caminho g limite visitados melhor-ultrapassou)
   (cond
-    ;; sem sucessores: devolve o melhor limite ultrapassado atÈ agora
+    ;; sem sucessores: devolve o melhor limite ultrapassado at√© agora
     ((null sucessores) melhor-ultrapassou)
 
     (t
@@ -614,7 +614,7 @@
        (if (consp resultado)
            resultado
 
-         ;; caso contr·rio, atualiza o melhor ultrapassado e continua
+         ;; caso contr√°rio, atualiza o melhor ultrapassado e continua
          (ida*-dfs-expand (cdr sucessores)
                           caminho
                           g
@@ -692,12 +692,12 @@
        (if (objetivo? (no-estado n0))
            (reverse (no-caminho n0))
 
-         ;; expandir nÛ
+         ;; expandir n√≥
          (let* ((filhos (expandir-no n0))
                 (novos (append filhos resto))
                 (limitados (cortar-ate novos max-nos)))
 
-           ;; recurs„o
+           ;; recurs√£o
            (sma*-aux limitados max-nos)))))))
 
 (defun sma* (inicial max-nos)
