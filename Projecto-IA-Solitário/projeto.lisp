@@ -4,13 +4,44 @@
 ;;; Lê: problemas.dat
 
 
+
+;; ------------ ferramentas simples ------------
+(defun read-int (prompt &optional min max)
+  "Lê um inteiro com prompt; valida intervalo se min/max fornecidos."
+  (format t "~a" prompt)
+  (let ((v (read)))
+    (if (and (integerp v) (or (null min) (>= v min)) (or (null max) (<= v max)))
+        v
+        (progn (format t "Entrada inválida. Tenta novamente.~%")
+               (read-int prompt min max)))))
+
+(defun read-str (prompt)
+  (format t "~a" prompt)
+  (finish-output)
+  (let ((s (read-line)))
+    (if s s (read-str prompt))))
+
+(defun yes-no-p (prompt)
+  (format t "~a (s/n): " prompt)
+  (let ((r (string-downcase (read-line))))
+    (cond ((or (string= r "s") (string= "sim")) t)
+          ((or (string= r "n") (string= "nao") (string= "não")) nil)
+          (t (format t "Resposta inválida.~%") (yes-no-p prompt)))))
+
+
+
+
+;; ------------ carregar modulos ------------
+
 ;; Fazer (setf *default-pathname-defaults* #P"C:/PastaProjeto/") no Listener
 
 (defun carregar-modulos ()
   "Carrega os ficheiros puzzle.lisp e procura.lisp"
+  (format t "Carregando puzzle.lisp...~%")
   (load "puzzle.lisp")
+  (format t "Carregado.~%"))
   ; (load "procura.lisp")
-)
+
 
 
 (defun ler-problemas ()
