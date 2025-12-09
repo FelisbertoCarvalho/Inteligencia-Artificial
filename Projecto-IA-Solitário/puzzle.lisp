@@ -1,14 +1,13 @@
-;; PROJECTO ;;; puzzle.lisp
-;;; Projeto Solitário - Inteligência Artificial 2025/2026
-;;; Autor: Felisberto de Carvalho, Tiago Gomes, Filipe Patricio
-;;; Descrição: Representação do tabuleiro e operadores do Solitário.
+;;; Projeto Solitario - Inteligencia Artificial 2025/2026
+;;; Autores: Felisberto de Carvalho, Tiago Campos, Filipe Patricio
+;;; Descricao: Representacao do tabuleiro e operadores do Solitario.
 
-;; valor no código: 1 - significado: há um pino
-;; valor no código: 0 - significado: casa vazia
-;; valor no código: nil - significado: fora do tabuleiro
+;; valor no codigo: 1 - significado: ha um pino
+;; valor no codigo: 0 - significado: casa vazia
+;; valor no codigo: nil - significado: fora do tabuleiro
 
 
-;;; Representação do tabuleiro inicial
+;;; Representacao do tabuleiro inicial
 (defun tabuleiro-inicial ()
   '((nil nil 1 1 1 nil nil)
     (nil nil 1 1 1 nil nil)
@@ -69,19 +68,19 @@
     (nil nil 0 0 0 nil nil)))
 
 
-;;; Retorna o n-ésimo elemento de uma lista (recursivamente)
+;;; Retorna o n-esimo elemento de uma lista (recursivamente)
 (defun get-nth (n lst)
   (if (zerop n)
       (car lst)
       (get-nth (1- n) (cdr lst))))
 
-;;; Substitui o elemento na posição n de uma lista (recursivamente)
+;;; Substitui o elemento na posicao n de uma lista (recursivamente)
 (defun set-nth (n new-val lst)
   (if (zerop n)
       (cons new-val (cdr lst))
       (cons (car lst) (set-nth (1- n) new-val (cdr lst)))))
 
-;;; Acede a uma posição (linha, coluna)
+;;; Acede a uma posicao (linha, coluna)
 (defun get-pos (linha coluna tab)
   (if (or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
       nil
@@ -91,7 +90,7 @@
             (get-nth (1- coluna) linha-val)))))
 
 
-;;; Substitui um valor numa posição (linha, coluna)
+;;; Substitui um valor numa posicao (linha, coluna)
 (defun set-pos (linha coluna new-val tab)
   (if (or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
       tab  ; devolve o tabuleiro inalterado
@@ -100,16 +99,16 @@
           (cons (car tab) (set-pos (1- linha) coluna new-val (cdr tab))))))
 
 
-;;; Verifica se uma posição (linha, coluna) é válida no tabuleiro
+;;; Verifica se uma posicao (linha, coluna) e valida no tabuleiro
 (defun pos-valida? (linha coluna tab)
   (cond
     ;; fora dos limites (menor que 1 ou maior que 7)
     ((or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7))
      nil)
-    ;; posição é nil (fora da cruz)
+    ;; posicao e nil (fora da cruz)
     ((null (get-pos linha coluna tab))
      nil)
-    ;; caso contrário, é válida
+    ;; caso contrario, e valida
     (t t)))
 
 
@@ -122,25 +121,25 @@
 
 (defun cr (linha coluna tab)
   (if (and
-        ;; todas as posições envolvidas são válidas
+        ;; todas as posicoes envolvidas sao validas
         (pos-valida? linha coluna tab)
         (pos-valida? linha (+ coluna 1) tab)
         (pos-valida? linha (+ coluna 2) tab)
-        ;; condições do movimento
+        ;; condicoes do movimento
         (= (get-pos linha coluna tab) 1)     ; origem tem pino
         (= (get-pos linha (+ coluna 1) tab) 1) ; pino a ser comido
         (= (get-pos linha (+ coluna 2) tab) 0)) ; destino vazio
-      ;; então cria novo tabuleiro recursivamente
+      ;; entao cria novo tabuleiro recursivamente
       (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
              (tab2 (set-pos linha (+ coluna 1) 0 tab1))      ; remove o pino do meio
              (tab3 (set-pos linha (+ coluna 2) 1 tab2)))     ; destino ganha pino
         tab3)
-      ;; caso contrário, devolve o mesmo tabuleiro (movimento inválido)
+      ;; caso contrario, devolve o mesmo tabuleiro (movimento invalido)
       tab))
 
 
 ;;(setq t1 (tabuleiro-inicial))
-;;; mover o pino da posição (4,2) para (4,4)
+;;; mover o pino da posicao (4,2) para (4,4)
 ;;(setq t2 (cr 4 2 t1))
 ;;(get-pos 4 2 t2)  ; 0 -> origem vazia
 ;;(get-pos 4 3 t2)  ; 0 -> pino comido
@@ -149,20 +148,20 @@
 
 (defun cl (linha coluna tab)
   (if (and
-        ;; todas as posições envolvidas são válidas
+        ;; todas as posicoes envolvidas sao validas
         (pos-valida? linha coluna tab)
         (pos-valida? linha (- coluna 1) tab)
         (pos-valida? linha (- coluna 2) tab)
-        ;; condições do movimento
+        ;; condioes do movimento
         (= (get-pos linha coluna tab) 1)       ; origem tem pino
         (= (get-pos linha (- coluna 1) tab) 1)  ; pino a ser comido
         (= (get-pos linha (- coluna 2) tab) 0)) ; destino vazio
-      ;; movimento válido devolve novo tabuleiro
+      ;; movimento valido devolve novo tabuleiro
       (let* ((tab1 (set-pos linha coluna 0 tab))             ; origem vazia
              (tab2 (set-pos linha (- coluna 1) 0 tab1))      ; remove o pino do meio
              (tab3 (set-pos linha (- coluna 2) 1 tab2)))     ; destino ganha pino
         tab3)
-      ;; movimento inválido  devolve o mesmo tabuleiro
+      ;; movimento invalido  devolve o mesmo tabuleiro
       tab))
 
 ;; (setq t1 (tabuleiro-inicial))
@@ -174,20 +173,20 @@
 
 (defun ct (linha coluna tab)
   (if (and
-        ;; posições válidas
+        ;; posicoes validas
         (pos-valida? linha coluna tab)
         (pos-valida? (- linha 1) coluna tab)
         (pos-valida? (- linha 2) coluna tab)
-        ;; condições do movimento
+        ;; condicoes do movimento
         (= (get-pos linha coluna tab) 1)       ; origem com pino
         (= (get-pos (- linha 1) coluna tab) 1) ; pino a ser comido
         (= (get-pos (- linha 2) coluna tab) 0)) ; destino vazio
-      ;; aplica as mudanças recursivamente
+      ;; aplica as mudancas recursivamente
       (let* ((tab1 (set-pos linha coluna 0 tab))            ; origem vazia
              (tab2 (set-pos (- linha 1) coluna 0 tab1))     ; remove o pino do meio
              (tab3 (set-pos (- linha 2) coluna 1 tab2)))    ; destino ganha o pino
         tab3)
-      ;; movimento inválido
+      ;; movimento invalido
       tab))
 
 
