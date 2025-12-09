@@ -371,7 +371,7 @@
 
 (defun bfs-aux (fila visitados)
   (cond
-    ;; 1. Se a fila estÃ¡ vazia, nÃ£o hÃ¡ soluÃ§Ã£o
+    ;; 1. Se a fila esta¡ vazia, naoo ha¡ solucao
     ((null fila)
      nil)
 
@@ -381,19 +381,19 @@
             (estado (first nodo))
             (caminho (second nodo)))
 
-       ;; 2. Se este estado jÃ¡ foi visitado, ignora e continua
+       ;; 2. Se este estado ja¡ foi visitado, ignora e continua
        (if (estado-visitado? estado visitados)
            (bfs-aux (cdr fila) visitados)
 
-         ;; 3. Se o estado atual Ã© objetivo  devolve caminho
+         ;; 3. Se o estado atual do objetivo  devolve caminho
          (if (objetivo? estado)
              (reverse caminho)
 
-           ;; 4. Caso contrÃ¡rio, gerar sucessores
-           ;; Cada sucessor Ã© um par (mov . novo-estado)
+           ;; 4. Caso contrario, gerar sucessores
+           ;; Cada sucessor e um par (mov . novo-estado)
            (let ((sucessores (gera-sucessores estado)))
 
-             ;; converter sucessores em nÃ³s vÃ¡lidos
+             ;; converter sucessores em nos validos
              (let ((novos-nodos
                      (mapcar
                        (lambda (par)
@@ -403,7 +403,7 @@
                        sucessores)))
 
                ;; 5. Chamada recursiva ao BFS:
-               ;; - adiciona novos nÃ³s ao fim da fila
+               ;; - adiciona novos nos ao fim da fila
                ;; - marca estado como visitado
                (bfs-aux
                  (append (cdr fila) novos-nodos)
@@ -427,9 +427,9 @@
 
     ;; limite atingido
     ((>= prof limite)
-     :limit)  ; sinaliza que parou por profundidade, nÃ£o por falha total
+     :limit)  ; sinaliza que parou por profundidade, nao por falha total
 
-    ;; estado jÃ¡ visitado
+    ;; estado ja visitado
     ((estado-visitado? estado visitados)
      :fail)
 
@@ -439,25 +439,25 @@
        (dfs-l-list sucessores caminho prof limite (cons estado visitados))))))
 
 
-(defun dfs-l-list (lista-sucessores caminho prof limite visitados)
+(defun dfs-l-list (lista-sucessores caminho prof limite visitados)  ;Percorre recursivamente a lista de sucessores, tentando cada sucessor pela ordem.
   (cond
-    ((null lista-sucessores) :fail)
-    (t
+    ((null lista-sucessores) :fail)           ;; 1) Se não há sucessores restantes, falha (nesta ramificação não encontrou solução).  
+    (t                                        ;; 2) Caso haja sucessores, processa o primeiro (car) e prepara dados para explorar
      (let* ((par (car lista-sucessores))
             (mov (car par))
             (novo-est (cdr par))
             (novo-caminho (cons mov caminho)))
 
-       (let ((resultado
+       (let ((resultado                       ;; 3) Chama dfs-aux no sucessor atual, aumentando a profundidade (prof + 1)
               (dfs-aux novo-est
                                 novo-caminho
                                 (+ prof 1)
                                 limite
                                 visitados)))
-         (if (or (not (eq resultado :fail))
+         (if (or (not (eq resultado :fail))  ;; 4) Se o resultado NÃO for :fail (ou for :limit), devolve-o
                  (eq resultado :limit))
              resultado
-           (dfs-l-list (cdr lista-sucessores)
+           (dfs-l-list (cdr lista-sucessores)  ;5) Caso contrário (resultado = :fail), tenta o próximo sucessor da lista
                        caminho
                        prof
                        limite
@@ -471,7 +471,7 @@
 
 
 (defun a*-aux (abertos fechados)
-  ;; se nÃ£o hÃ¡ mais nÃ³s a expandir  falha
+  ;; se nao ha mais nos a expandir falha
   (cond
     ((null abertos) :fail)
 
@@ -488,7 +488,7 @@
             (caminho (second nodo))
             (g (third nodo)))
 
-       ;; se estado jÃ¡ explorado, ignora
+       ;; se estado ja explorado, ignora
        (if (estado-visitado? estado fechados)
            (a*-aux (cdr ordenados) fechados)
 
@@ -509,7 +509,7 @@
                                 (h2 novo-est))))
                       sucessores)))
 
-             ;; recursÃ£o com:
+             ;; recursao com:
              ;; - adicionar sucessores aos abertos
              ;; - estado atual passa para fechados
              (a*-aux
@@ -517,21 +517,21 @@
                (cons estado fechados)))))))))
 
 
-(defun h-pinos (tab)
+(defun h-pinos (tab)         ;; Heurística auxiliar: conta pinos (com ajuste)
   (let ((p (conta-pinos tab)))
     (max 0 (- p 1))))
 
 
-(defun pinos-bloqueados (tab)
+(defun pinos-bloqueados (tab)  ;; Conta quantos pinos estão "bloqueados" (não têm movimentos válidos)
   (labels ((conta-na-pos (linha coluna)
-             (cond
+             (cond               ;; fora dos limites do tabuleiro 7x7 -> 0
                ((or (< linha 1) (> linha 7) (< coluna 1) (> coluna 7)) 0)
-               ((null (get-pos linha coluna tab)) 0)
-               ((= (get-pos linha coluna tab) 0) 0)
-               ((null (movimentos-validos-de-pos linha coluna tab)) 1)
+               ((null (get-pos linha coluna tab)) 0)    ;; posição considerada 'nil' na representação (fora da cruz) -> 0
+               ((= (get-pos linha coluna tab) 0) 0)    ;; casa vazia -> 0
+               ((null (movimentos-validos-de-pos linha coluna tab)) 1)   ;; se há pino mas não existem movimentos válidos a partir daqui -> conta 1
                (t 0))))
 
-    (labels ((aux-linhas (l)
+    (labels ((aux-linhas (l)  ;; funções auxiliares para percorrer a matriz linha a linha
                (if (> l 7) 0
                  (+ (aux-colunas l 1)
                     (aux-linhas (+ l 1)))))
@@ -543,10 +543,14 @@
 
       (aux-linhas 1))))
 
-(defun h2 (tab)
-  (+ (h-pinos tab)
-     (pinos-bloqueados tab)))
+(defun h2 (tab)                          ;;"Heurística composta utilizada como h(n) nas procuras informadas.
+  (+ (h-pinos tab)                       ;;Combina duas componentes:
+     (pinos-bloqueados tab)))            ;;- h-pinos(tab): aproximação do número de pinos restantes (p-1)
+                                         ;;- pinos-bloqueados(tab): penalização por pinos sem movimentos possíveis
 
+
+"Retorna a soma das duas componentes. Valores maiores significam estados piores
+(do ponto de vista da heurística)"
 
 
 ;; Algoritmo IDA* 
@@ -591,10 +595,10 @@
 
 
 
-;;ExpansÃ£o dos sucessores, um por um
+;;Expansao dos sucessores, um por um
 (defun ida*-dfs-expand (sucessores caminho g limite visitados melhor-ultrapassou)
   (cond
-    ;; sem sucessores: devolve o melhor limite ultrapassado atÃ© agora
+    ;; sem sucessores: devolve o melhor limite ultrapassado ate agora
     ((null sucessores) melhor-ultrapassou)
 
     (t
@@ -613,7 +617,7 @@
        (if (consp resultado)
            resultado
 
-         ;; caso contrÃ¡rio, atualiza o melhor ultrapassado e continua
+         ;; caso contrario, atualiza o melhor ultrapassado e continua
          (ida*-dfs-expand (cdr sucessores)
                           caminho
                           g
@@ -627,23 +631,30 @@
  
 ;; ALGORITMO SMA*
 
+;; SMA* é uma versão do A* que funciona com memória limitada.
+;; Quando a lista de nós abertos atinge o máximo permitido,
+;; remove os piores nós (com maior f = g+h).
+
+;; Cria um nó com todos os seus componentes
+
 (defun make-no (estado caminho g h fmin)
   (list estado caminho g h fmin))
 
+;; Acessores simples para cada campo do nó
 (defun no-estado  (no) (nth 0 no))
 (defun no-caminho (no) (nth 1 no))
 (defun no-g       (no) (nth 2 no))
 (defun no-h       (no) (nth 3 no))
 (defun no-fmin    (no) (nth 4 no))
 
-
+;; Ordena os nós abertos pelo menor valor f = g + h
 (defun ordenar-abertos (abertos)
   (sort (copy-list abertos)
         (lambda (n1 n2)
           (< (+ (no-g n1) (no-h n1))
              (+ (no-g n2) (no-h n2))))))
 
-
+;; Expande um nó: gera os seus filhos e cria novos nós com g,h atualizados
 (defun expandir-no (no)
   (let* ((estado (no-estado no))
          (caminho (no-caminho no))
@@ -658,7 +669,7 @@
          (make-no novo (cons mov caminho) ng nh most-positive-fixnum)))
      pares)))
 
-
+;; Devolve o pior nó da lista aberta (maior f)
 (defun pior-no (abertos pior)
   (cond
     ((null abertos) pior)
@@ -668,21 +679,24 @@
               (novo-pior (if (> fn fp) n pior)))
          (pior-no (cdr abertos) novo-pior)))))
 
+;; Remove o pior nó da lista aberta
 (defun remover-pior (abertos)
   (let ((p (pior-no abertos nil)))
     (remove p abertos :test #'equal)))
 
+;; Corta a lista aberta para não ultrapassar o limite max-nos
 (defun cortar-ate (abertos max)
   (if (<= (length abertos) max)
       abertos
       (cortar-ate (remover-pior abertos) max)))
 
 
+;; Função principal auxiliar do SMA*
 (defun sma*-aux (abertos max-nos)
   (cond
     ((null abertos) :fail)
 
-    (t
+    (t ;; Escolhe o nó com menor f
      (let* ((ordenados (ordenar-abertos abertos))
             (n0 (car ordenados))
             (resto (cdr ordenados)))
@@ -691,14 +705,15 @@
        (if (objetivo? (no-estado n0))
            (reverse (no-caminho n0))
 
-         ;; expandir nÃ³
+         ;; expandir no
          (let* ((filhos (expandir-no n0))
                 (novos (append filhos resto))
                 (limitados (cortar-ate novos max-nos)))
 
-           ;; recursÃ£o
+           ;; recursao
            (sma*-aux limitados max-nos)))))))
 
+;; Interface: recebe estado inicial e máximo de nós permitidos
 (defun sma* (inicial max-nos)
   (let* ((h0 (h2 inicial))
          (root (make-no inicial '() 0 h0 h0)))
