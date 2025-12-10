@@ -1,3 +1,9 @@
+;;; Projeto Solitario - Inteligencia Artificial 2025/2026
+;;; Autores: 
+;; Felisberto de Carvalho 202200359
+;; Tiago Campos 202300064
+;; Filipe Patricio 202300133
+
 ;;; projeto.lisp
 ;;; Interface principal com o utilizador
 ;;; Carrega: puzzle.lisp e procura.lisp
@@ -9,7 +15,7 @@
 (defun carregar-ficheiros ()
   "Carrega os ficheiros puzzle.lisp e procura.lisp."
   (load "puzzle.lisp")
-  ; (load "procura.lisp")
+  (load "procura.lisp")
 )
 
 
@@ -101,10 +107,21 @@
 (defun executar-procura (tabuleiro algoritmo heuristica)
   "Executa o algoritmo escolhido pelo utilizador num dos tabuleiros."
   (cond ((= algoritmo 1) (bfs tabuleiro))
+
         ((= algoritmo 2) (dfs tabuleiro 30))
-        ((= algoritmo 3) (a* tabuleiro))
-        ((= algoritmo 4) (ida* tabuleiro))
-        ((= algoritmo 5) (sma* tabuleiro 30))
+
+        ((= algoritmo 3) 
+         (cond ((= heuristica 1)(a* tabuleiro (h1 tabuleiro)))
+               (t (a* tabuleiro (h2 tabuleiro)))))
+
+        ((= algoritmo 4) 
+         (cond ((= heuristica 1)(ida* tabuleiro (h1 tabuleiro)))
+               (t (ida* tabuleiro (h2 tabuleiro)))))
+
+        ((= algoritmo 5) 
+         (cond ((= heuristica 1)(sma* tabuleiro 30 (h1 tabuleiro)))
+               (t (sma* tabuleiro 30 (h2 tabuleiro)))))
+
         (t (format t "Algoritmo invalido!~%")))
 )
 
