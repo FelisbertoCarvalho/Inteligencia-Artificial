@@ -37,6 +37,26 @@
 )
 
 
+;; Guardar resultados no ficheiro resultados.dat
+
+(defun guardar-estatisticas (stats)
+  (with-open-file (str "resultados.dat"
+                       :direction :output
+                       :if-exists :append
+                       :if-does-not-exist :create)
+    (format str "--- Solucao Encontrada ---~%")
+    (format str "Algoritmo: ~A~%" (stats-algoritmo stats))
+    (format str "Tabuleiro: ~A~%" (stats-tabuleiro stats))
+    (format str "~%--- Estatisticas ---~%")
+    (format str "Fator de ramificacao: ~A~%" (stats-ramificacao stats))
+    (format str "Nos gerados: ~A~%" (stats-nos-gerados stats))
+    (format str "Nos expandidos: ~A~%" (stats-nos-expandidos stats))
+    (format str "Penetrancia: ~A~%" (stats-penetrancia stats))
+    (format str "Tempo (ms): ~A~%" (stats-tempo stats))
+    (format str "Caminho: ~A~%~%~%~%" (stats-caminho stats)))
+)
+
+
 ;; Listas de escolhas
 
 (defun menu-principal ()
@@ -95,6 +115,7 @@
                   (resultado (executar-procura problema algoritmo heuristica))
                 )
                 (mostrar-resultado resultado)
+                (guardar-estatisticas resultado)
                 ))
              ((= option 2)(format t "A sair do jogo...~%")
               (return))
@@ -106,7 +127,7 @@
 
 (defun executar-procura (tabuleiro algoritmo heuristica)
   "Executa o algoritmo escolhido pelo utilizador num dos tabuleiros."
-  (cond ((= algoritmo 1) (bfs tabuleiro))
+  (cond ((= algoritmo 1) (stats-bfs tabuleiro))
 
         ((= algoritmo 2) (dfs tabuleiro 30))
 
@@ -127,11 +148,46 @@
 
 (defun mostrar-resultado (resultado)
   "Mostra a solucao da procura no ecra."
-  (format t "-> Solucao encontrada: ~A~%" resultado)
+  (format t "-> Solucao encontrada: ~A~%" (last resultado))
 )
 
 
 ;; Ferramentas
+
+;; Acesso as estatisticas
+
+(defun stats-algoritmo (stats)
+  (nth 0 stats)
+)
+
+(defun stats-tabuleiro (stats)
+  (nth 1 stats)
+)
+
+(defun stats-ramificacao (stats)
+  (nth 2 stats)
+)
+
+(defun stats-nos-gerados (stats)
+  (nth 3 stats)
+)
+
+(defun stats-nos-expandidos (stats)
+  (nth 4 stats)
+)
+
+(defun stats-penetrancia (stats)
+  (nth 5 stats)
+)
+
+(defun stats-tempo (stats)
+  (nth 6 stats)
+)
+
+(defun stats-caminho (stats)
+  (nth 7 stats)
+)
+
 
 (defun read-int (prompt &optional min max)
   "Le um inteiro com prompt; valida intervalo se min/max fornecidos."

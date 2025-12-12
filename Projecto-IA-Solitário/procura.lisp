@@ -56,107 +56,243 @@
   (bfs-aux (list (list inicial '())) '()))
 
 
+
+
+
+
+
+;; Stats
+
+(defun criar-estatisticas (algoritmo 
+                           tabuleiro 
+                           ramificacao 
+                           gerados 
+                           expandidos 
+                           penetrancia 
+                           tempo 
+                           caminho)
+  "Cria uma lista com as estatisticas para comparacao de algoritmos"
+  (list algoritmo tabuleiro ramificacao gerados expandidos penetrancia tempo caminho)
+)
+
+(defun gera-e-conta-sucessores (tab)
+  "Gera os sucessores e devolve-os juntamente com a sua quantidade"
+  (let ((sucessores (gera-sucessores tab)))
+    (values sucessores (length sucessores)))
+)
+
+
+(defun stats-bfs (inicial)
+  "Algoritmo de procura BFS, devolve estatisticas"
+  (let ((tempo-inicial (get-internal-real-time)))
+
+    (multiple-value-bind (caminho gerados expandidos)
+        (stats-bfs-aux (list (list inicial '())) '() 0 0)
+
+      (let* ((tempo-final (get-internal-real-time))
+             (tempo-ms 
+              (/ (* (- tempo-final tempo-inicial) 1000) internal-time-units-per-second))
+             (profundidade (length caminho))
+             (ramificacao (if (zerop expandidos) 0 (/ gerados expandidos)))
+             (penetrancia (if (zerop gerados)    0 (/ profundidade gerados))))
+
+        (criar-estatisticas "BFS" inicial ramificacao gerados expandidos 
+                            penetrancia tempo-ms caminho))))
+)
+
+(defun stats-bfs-aux (fila visitados gerados expandidos)
+  "Funcao auxiliar do algoritmo bfs, com estatisticas"
+  (cond ((null fila) (values nil gerados expandidos))
+
+        ;; Extrai o primeiro no da fila
+        (t (let* ((nodo (first fila))
+                  (estado (first nodo))
+                  (caminho (second nodo)))
+             
+             ;; Se o estado ja foi visitado continua com o resto da fila 
+             (if (estado-visitado? estado visitados)
+                 (stats-bfs-aux (rest fila) visitados gerados expandidos)
+               
+               ;; Incrementar nos expandidos
+               (let ((exps (+ expandidos 1)))
+
+                 ;; Se o objetivo for alcancado
+                 (if (objetivo? estado)
+                     (values (reverse caminho) gerados exps)
+
+                   (multiple-value-bind (sucs novos-gerados)
+                       (gera-e-conta-sucessores estado)
+                     
+                     ;; Incrementar nos gerados
+                     (let ((gers (+ gerados novos-gerados)))
+                       
+                       ;; Remove primeiro elemento da fila e adiciona sucessores ao fim
+                       (stats-bfs-aux
+                        (append (rest fila)
+                                (mapcar (lambda (par)
+                                          (list (rest par)
+                                                (cons (first par) caminho)))
+                                        sucs))
+                        (cons estado visitados)
+                        gers
+                        exps)))))))))
+)
+
+
 ;;;Algoritmo  DFS COM LIMITE DE PROFUNDIDADE
 
 (defun dfs (estado limite)
-  (dfs-aux estado '() 0 limite '()))
+  "Algoritmo DFS com limite, devolve estatisticas"
+  (let ((tempo-inicial (get-internal-real-time)))
 
-(defun dfs-aux (estado caminho prof limite visitados)
-  (cond
-    ;; objetivo
-    ((objetivo? estado)
-     (reverse caminho))
+    (multiple-value-bind (caminho gerados expandidos)
+        (dfs-aux estado '() 0 limite '() 0 0)
 
-    ;; limite atingido
+      (let* ((tempo-final (get-internal-real-time))
+             (tempo-ms 
+              (/ (* (- tempo-final tempo-inicial) 1000) internal-time-units-per-second))
+             (profundidade (length caminho))
+             (ramificacao (if (zerop expandidos) 0 (/ gerados expandidos)))
+             (penetrancia (if (zerop gerados)    0 (/ profundidade gerados))))
+
+        (criar-estatisticas "DFS" estado ramificacao gerados expandidos 
+                            penetrancia tempo-ms caminho))))
+)
+
+(defun dfs-aux (estado caminho prof limite visitados gerados expandidos)
+  "Funcao auxiliar do algoritmo dfs, com estatisticas"
+  (cond ((objetivo? estado)
+         (values (reverse caminho) gerados expandidos))
+
+    ;; Sinaliza que parou por profundidade nao por falha total
     ((>= prof limite)
-     :limit)  ; sinaliza que parou por profundidade, nao por falha total
+     (values nil gerados expandidos :limit))
 
-    ;; estado ja visitado
+    ;; Estado ja visitado
     ((estado-visitado? estado visitados)
-     :fail)
+     (values nil gerados expandidos :fail))
 
     (t
-     ;; gerar sucessores
-     (let ((sucessores (gera-sucessores estado)))
-       (dfs-l-list sucessores caminho prof limite (cons estado visitados))))))
+     ;; Gerar sucessores
+     (multiple-value-bind (sucessores novos-gerados)
+             (gera-e-conta-sucessores estado)
+
+           ;; Incrementar contadores
+           (let ((gers (+ gerados novos-gerados))
+                 (exps (+ expandidos 1)))
+             
+             ;; Explorar lista de sucessores
+             (dfs-l-list sucessores caminho prof limite
+                   (cons estado visitados) gers exps)))))
+)
 
 
-(defun dfs-l-list (lista-sucessores caminho prof limite visitados)  ;Percorre recursivamente a lista de sucessores, tentando cada sucessor pela ordem.
+(defun dfs-l-list (lista-sucessores caminho prof limite visitados gerados expandidos)
+  "Percorre, recursivamente, a lista de sucessores, tentando cada sucessor pela ordem"
   (cond
-    ((null lista-sucessores) :fail)           ;; 1) Se não há sucessores restantes, falha (nesta ramificação não encontrou solução).  
-    (t                                        ;; 2) Caso haja sucessores, processa o primeiro (car) e prepara dados para explorar
-     (let* ((par (car lista-sucessores))
-            (mov (car par))
-            (novo-est (cdr par))
-            (novo-caminho (cons mov caminho)))
+   ;; 1) Se nao ha sucessores restantes, falha (nesta ramificação não encontrou solução).
+    ((null lista-sucessores)
+     (values nil gerados expandidos :fail))
 
-       (let ((resultado                       ;; 3) Chama dfs-aux no sucessor atual, aumentando a profundidade (prof + 1)
-              (dfs-aux novo-est
-                                novo-caminho
-                                (+ prof 1)
-                                limite
-                                visitados)))
-         (if (or (not (eq resultado :fail))  ;; 4) Se o resultado NÃO for :fail (ou for :limit), devolve-o
-                 (eq resultado :limit))
-             resultado
-           (dfs-l-list (cdr lista-sucessores)  ;5) Caso contrário (resultado = :fail), tenta o próximo sucessor da lista
-                       caminho
-                       prof
-                       limite
-                       visitados)))))))
+    ;; 2) Caso contrario, processa o primeiro (first) e prepara dados para explorar
+    (t (let* ((par (first lista-sucessores))
+              (mov (first par))
+              (novo-estado (rest par))
+              (novo-caminho (cons mov caminho)))
+
+       ;; 3) Chama dfs-aux no sucessor atual, aumentando a profundidade (prof + 1)
+       (multiple-value-bind (caminho gers exps resultado)
+              (dfs-aux novo-estado novo-caminho (+ prof 1) 
+                       limite visitados gerados expandidos)
+
+         ;; 4) Se o resultado NAO for :fail (ou for :limit), devolve-o
+         (if (or (not (eq resultado :fail)) (eq resultado :limit))
+             (values caminho gers exps resultado)
+
+           ;; 5) Caso contrario (resultado = :fail), tenta o próximo sucessor da lista
+           (dfs-l-list (rest lista-sucessores) caminho 
+                       prof limite visitados gers exps))))))
+)
+
+
+
+
+
+
+
 
 
 ;;; A*
 
 (defun a* (inicial h)
-  (a*-aux (list (list inicial '() 0 h)) '()))
+  "Algoritmo A*, devolve estatisticas"
+  (let ((tempo-inicial (get-internal-real-time)))
+
+    (multiple-value-bind (caminho gerados expandidos)
+        (a*-aux (list (list inicial '() 0 h)) '() 0 0)
+
+      (let* ((tempo-final (get-internal-real-time))
+             (tempo-ms 
+              (/ (* (- tempo-final tempo-inicial) 1000) internal-time-units-per-second))
+             (profundidade (length caminho))
+             (ramificacao (if (zerop expandidos) 0 (/ gerados expandidos)))
+             (penetrancia (if (zerop gerados)    0 (/ profundidade gerados))))
+
+        (criar-estatisticas "A*" inicial ramificacao gerados expandidos 
+                            penetrancia tempo-ms caminho))))
+)
 
 
-(defun a*-aux (abertos fechados)
-  ;; se nao ha mais nos a expandir falha
-  (cond
-    ((null abertos) :fail)
+(defun a*-aux (abertos fechados gerados expandidos)
+  "Funcao auxiliar do algoritmo A*, com estatisticas"
+  ;; Se nao ha mais nos a expandir falha
+  (cond ((null abertos)
+         (values nil gerados expandidos :fail))
 
-    (t
-     ;; ordenar a lista aberta pelo menor f
-     (let* ((ordenados
-             (sort (copy-list abertos)
-                   (lambda (n1 n2)
-                     (< (+ (third n1) (fourth n1))  ; g+h
-                        (+ (third n2) (fourth n2))))))
+        ;; Ordenar por f = g + h
+        (t (let* ((ordenados
+                   (sort (copy-list abertos)
+                         (lambda (n1 n2)
+                           (< (+ (third n1) (fourth n1))  ; g + h
+                              (+ (third n2) (fourth n2))))))
 
-            (nodo (car ordenados))
-            (estado (first nodo))
-            (caminho (second nodo))
-            (g (third nodo)))
+                  (nodo (first ordenados))
+                  (estado (first nodo))
+                  (caminho (second nodo))
+                  (g (third nodo)))
 
-       ;; se estado ja explorado, ignora
-       (if (estado-visitado? estado fechados)
-           (a*-aux (cdr ordenados) fechados)
+             ;; Se estado ja explorado, ignora
+             (if (estado-visitado? estado fechados)
+                 (a*-aux (rest ordenados) fechados gerados expandidos)
 
-         ;; se objetivo  devolve caminho
-         (if (objetivo? estado)
-             (reverse caminho)
+               ;; Se objetivo  devolve caminho
+               (let ((exps (+ expandidos 1)))
+                 (if (objetivo? estado)
+                     (values (reverse caminho) gerados exps)
 
-           ;; gerar sucessores
-           (let* ((sucessores (gera-sucessores estado))
-                  (novos-nos
-                    (mapcar
-                      (lambda (par)
-                        (let ((mov (car par))
-                              (novo-est (cdr par)))
-                          (list novo-est
-                                (cons mov caminho)
-                                (+ g 1)
-                                (h2 novo-est))))
-                      sucessores)))
+                   ;; Gerar sucessores
+                   (multiple-value-bind (sucessores novos-gerados)
+                       (gera-e-conta-sucessores estado)
+           
+                     (let ((gers (+ gerados novos-gerados))
+                           (novos-nos
+                            (mapcar
+                             (lambda (par)
+                               (let ((mov (first par))
+                                     (novo-est (rest par)))
+                                 (list novo-est
+                                       (cons mov caminho)
+                                       (+ g 1)
+                                       (h2 novo-est))))
+                             sucessores)))
 
-             ;; recursao com:
-             ;; - adicionar sucessores aos abertos
-             ;; - estado atual passa para fechados
-             (a*-aux
-               (append (cdr ordenados) novos-nos)
-               (cons estado fechados)))))))))
+                       ;; Recursao com:
+                       ;; - Adicionar sucessores aos abertos
+                       ;; - Estado atual passa para fechados
+                       (a*-aux
+                        (append (rest ordenados) novos-nos)
+                        (cons estado fechados) gers exps)))))))))
+)
 
 ;; Heuristica 1
 (defun h1 (tab)
@@ -201,74 +337,117 @@
 ;; Algoritmo IDA* 
 
 (defun ida* (inicial h)
-  (let ((limite (+ 0 h)))
-    (ida*-iter inicial limite)))
+  "Algoritmo IDA*, devolve estatisticas"
+  (let ((tempo-inicial (get-internal-real-time))
+        (limite h))
+
+  (multiple-value-bind (caminho gerados expandidos)
+    (ida*-iter inicial limite h 0 0)
+
+  (let* ((tempo-final (get-internal-real-time))
+             (tempo-ms (/ (* (- tempo-final tempo-inicial) 1000)
+                          internal-time-units-per-second))
+             (profundidade (length caminho))
+             (ramificacao (if (zerop expandidos) 0 (/ gerados expandidos)))
+             (penetrancia (if (zerop gerados) 0 (/ profundidade gerados))))
+
+        (criar-estatisticas "IDA*" inicial ramificacao gerados expandidos
+                            penetrancia tempo-ms caminho))))
+)
 
 
 ;;Iterador do IDA*
-(defun ida*-iter (estado limite)
-  (let ((resultado (ida*-dfs estado '() 0 limite '() most-positive-fixnum)))
-    (cond
-      ((consp resultado) resultado)  ; caminho encontrado
-      ((= resultado most-positive-fixnum) :fail) ; impossÃ­vel
-      (t (ida*-iter estado resultado))))) ; aumentar limite e repetir
+
+(defun ida*-iter (estado limite h gerados expandidos)
+  ;; Executa um DFS limitado
+  (multiple-value-bind (caminho gers exps resultado)
+      (ida*-dfs estado '() 0 h limite '() gerados expandidos)
+
+    ;; Caminho encontrado
+    (cond ((eq resultado :ok)
+           (values caminho gers exps :ok))
+
+      ;; Caminho nao encontrado e resultado infinito
+      ((= resultado most-positive-fixnum)
+       (values nil gers exps :fail))
+
+      ;; Caso contrario, aumentar limite e repetir
+      (t (ida*-iter estado resultado h gers exps))))
+)
 
 
 ;;DFS do IDA*
-(defun ida*-dfs (estado caminho g limite visitados melhor-ultrapassou)
-  (let* ((h (h2 estado))
-         (f (+ g h)))  ; custo total
-    (cond
-      ;; 1. Se f > limite  este estado nÃ£o pode ser expandido
-      ((> f limite)
-       (min melhor-ultrapassou f))
 
-      ;; 2. Objetivo encontrado
-      ((objetivo? estado)
-       (reverse caminho))
+(defun ida*-dfs (estado caminho g h limite visitados gerados expandidos)
+  ;; Custo total
+  (let ((f (+ g h)))
 
-      ;; 3. Estado repetido  evita ciclos
-      ((estado-visitado? estado visitados)
-       melhor-ultrapassou)
+    ;; 1. Se f > limite  este estado nao pode ser expandido
+    (cond ((> f limite)
+           (values nil gerados expandidos f))
 
-      (t
-       ;; 4. Explora sucessores
-       (let ((sucessores (gera-sucessores estado)))
-         (ida*-dfs-expand sucessores caminho g limite
-                          (cons estado visitados)
-                          melhor-ultrapassou))))))
+          ;; 2. Objetivo encontrado
+          ((objetivo? estado)
+           (values (reverse caminho) gerados expandidos :ok))
+
+          ;; 3. Estado repetido evita ciclos
+          ((estado-visitado? estado visitados)
+           (values nil gerados expandidos most-positive-fixnum))
+
+          (t
+           ;; 4. Explora sucessores
+           (multiple-value-bind (sucessores novos-gerados)
+               (gera-e-conta-sucessores estado)
+
+             (let ((gers (+ gerados novos-gerados))
+                   (exps (+ expandidos 1)))
+
+               ;; Expandir sucessores
+               (ida*-dfs-expand sucessores caminho g h limite (cons estado visitados) 
+                                gers exps most-positive-fixnum))))))
+)
 
 
+;; Expansao dos sucessores, um por um
 
-;;Expansao dos sucessores, um por um
-(defun ida*-dfs-expand (sucessores caminho g limite visitados melhor-ultrapassou)
+(defun ida*-dfs-expand (sucessores caminho g h limite visitados gerados expandidos melhor-ultrapassou)
   (cond
-    ;; sem sucessores: devolve o melhor limite ultrapassado ate agora
-    ((null sucessores) melhor-ultrapassou)
+   ;; Sem sucessores: Devolve o melhor limite ultrapassado ate agora
+   ((null sucessores)
+    (values nil gerados expandidos melhor-ultrapassou))
 
-    (t
-     (let* ((par (car sucessores))
-            (mov (car par))
-            (novo-est (cdr par))
-            (resultado
-              (ida*-dfs novo-est
-                        (cons mov caminho)
-                        (+ g 1)
-                        limite
-                        visitados
-                        melhor-ultrapassou)))
+   (t
+    ;; Extrair sucessor
+    (let* ((par (first sucessores))
+           (mov (first par))
+           (novo-est (rest par))
+           (novo-caminho (cons mov caminho)))
 
-       ;; se encontrou caminho devolve caminho
-       (if (consp resultado)
-           resultado
+      (multiple-value-bind (cam gers exps resultado)
+          (ida*-dfs novo-est
+                    novo-caminho
+                    (+ g 1)
+                    h
+                    limite
+                    visitados
+                    gerados
+                    expandidos)
 
-         ;; caso contrario, atualiza o melhor ultrapassado e continua
-         (ida*-dfs-expand (cdr sucessores)
-                          caminho
-                          g
-                          limite
-                          visitados
-                          (min melhor-ultrapassou resultado)))))))
+    ;; Se encontrou caminho devolve caminho
+    (if (eq resultado :ok)
+        (values cam gers exps :ok)
+
+      ;; Caso contrario, atualiza o melhor ultrapassado e continua
+      (ida*-dfs-expand (rest sucessores)
+                       caminho
+                       g
+                       h
+                       limite
+                       visitados
+                       gers
+                       exps
+                       (min melhor-ultrapassou resultado)))))))
+)
 
 
 ;; (setq t0 (tabuleiro-inicial))
@@ -306,13 +485,38 @@
          (g (no-g no))
          (pares (gera-sucessores estado)))
     (mapcar
-     (lambda (p)
-       (let* ((mov (car p))
-              (novo (cdr p))
+     (lambda (par)
+       (let* ((mov (first par))
+              (novo (rest par))
               (ng (+ g 1))
               (nh (h2 novo)))
          (make-no novo (cons mov caminho) ng nh most-positive-fixnum)))
      pares)))
+
+
+(defun stats-expandir-no (no gerados expandidos)
+  "Funcao expandir-no, mas devolve estatisticas"
+  (let* ((estado (no-estado no))
+         (caminho (no-caminho no))
+         (g (no-g no)))
+
+    (multiple-value-bind (pares novos-gerados)
+        (gera-e-conta-sucessores estado)
+      
+      (let ((gers (+ gerados novos-gerados)))
+        (let ((filhos   
+               (mapcar
+                (lambda (par)
+                  (let* ((mov (first par))
+                         (novo (rest par))
+                         (ng (+ g 1))
+                         (nh (h2 novo)))
+                    (make-no novo (cons mov caminho) ng nh most-positive-fixnum)))
+                pares)))
+          
+          (values filhos gers expandidos)))))
+)
+
 
 ;; Devolve o pior nó da lista aberta (maior f)
 (defun pior-no (abertos pior)
@@ -337,29 +541,54 @@
 
 
 ;; Função principal auxiliar do SMA*
-(defun sma*-aux (abertos max-nos)
-  (cond
-    ((null abertos) :fail)
 
-    (t ;; Escolhe o nó com menor f
-     (let* ((ordenados (ordenar-abertos abertos))
-            (n0 (car ordenados))
-            (resto (cdr ordenados)))
+(defun sma*-aux (abertos max-nos gerados expandidos)
+  (cond ((null abertos) 
+         (values nil gerados expandidos :fail))
 
-       ;; caso objetivo
-       (if (objetivo? (no-estado n0))
-           (reverse (no-caminho n0))
+        (t 
+         ;; Escolhe o nó com menor f (f = g + h)
+         (let* ((ordenados (ordenar-abertos abertos))
+                (n0 (first ordenados))
+                (resto (rest ordenados)))
 
-         ;; expandir no
-         (let* ((filhos (expandir-no n0))
-                (novos (append filhos resto))
-                (limitados (cortar-ate novos max-nos)))
+           ;; Caso objetivo encontrado
+           (if (objetivo? (no-estado n0))
+               (values (reverse (no-caminho n0)) gerados expandidos)
 
-           ;; recursao
-           (sma*-aux limitados max-nos)))))))
+             ;; Expandir no
+             (multiple-value-bind (filhos novos-gerados novos-expandidos)
+                 (stats-expandir-no n0 gerados expandidos)
+
+               (let ((gers novos-gerados)
+                     (exps (+ novos-expandidos 1)))
+
+                 ;; Nova lista com filhos + resto
+                 (let* ((novos (append filhos resto))
+                        (limitados (cortar-ate novos max-nos)))
+
+                 ;; Recursao SMA*
+                 (sma*-aux limitados max-nos gers exps))))))))
+)
+
 
 ;; Interface: recebe estado inicial e máximo de nós permitidos
+
 (defun sma* (inicial max-nos h)
-  (let* ((h0 h)
-         (root (make-no inicial '() 0 h0 h0)))
-    (sma*-aux (list root) max-nos)))
+  "Algoritmo SMA*, devolve estatisticas"
+  (let ((tempo-inicial (get-internal-real-time))
+        (root (make-no inicial '() 0 h h)))
+
+    (multiple-value-bind (caminho gerados expandidos)
+        (sma*-aux (list root) max-nos 0 0)
+
+    (let* ((tempo-final (get-internal-real-time))
+           (tempo-ms (/ (* (- tempo-final tempo-inicial) 1000)
+                        internal-time-units-per-second))
+           (profundidade (length caminho))
+           (ramificacao (if (zerop expandidos) 0 (/ gerados expandidos)))
+           (penetrancia (if (zerop gerados) 0 (/ profundidade gerados))))
+
+      (criar-estatisticas "SMA*" inicial ramificacao gerados expandidos
+                          penetrancia tempo-ms caminho))))
+)

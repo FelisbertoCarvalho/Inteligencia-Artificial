@@ -6,6 +6,7 @@
 
 ;;; puzzle.lisp
 ;;; Representacao do tabuleiro e operadores de movimento do Solitario.
+
 ;; valor no codigo: 1 - significado: ha um pino
 ;; valor no codigo: 0 - significado: casa vazia
 ;; valor no codigo: nil - significado: fora do tabuleiro

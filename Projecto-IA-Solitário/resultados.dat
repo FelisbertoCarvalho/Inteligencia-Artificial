@@ -1,0 +1,266 @@
+--- Solucao Encontrada ---
+Algoritmo: BFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 1
+Nos gerados: 4
+Nos expandidos: 4
+Penetrancia: 1/2
+Tempo (ms): 7
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: BFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 6/5
+Nos gerados: 12
+Nos expandidos: 10
+Penetrancia: 1/4
+Tempo (ms): 21
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: DFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 4/3
+Nos gerados: 4
+Nos expandidos: 3
+Penetrancia: 1/2
+Tempo (ms): 7
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: DFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 2
+Nos gerados: 8
+Nos expandidos: 4
+Penetrancia: 1/4
+Tempo (ms): 10
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: DFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 1 0 0) (0 0 0 0 1 1 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 101/102
+Nos gerados: 101
+Nos expandidos: 102
+Penetrancia: 0
+Tempo (ms): 236
+Caminho: NIL
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: DFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 1 NIL NIL) (0 0 0 0 1 1 0) (0 0 0 0 1 1 1) (0 0 0 1 1 1 1) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 11119/11120
+Nos gerados: 11119
+Nos expandidos: 11120
+Penetrancia: 0
+Tempo (ms): 26154
+Caminho: NIL
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: DFS
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 1 1 1 1) (0 0 0 0 1 1 1) (0 0 0 1 1 1 1) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 867/862
+Nos gerados: 4335
+Nos expandidos: 4310
+Penetrancia: 2/4335
+Tempo (ms): 10131
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: A*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 4/3
+Nos gerados: 4
+Nos expandidos: 3
+Penetrancia: 1/2
+Tempo (ms): 8
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: A*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 2
+Nos gerados: 12
+Nos expandidos: 6
+Penetrancia: 1/4
+Tempo (ms): 20
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: A*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 4/3
+Nos gerados: 4
+Nos expandidos: 3
+Penetrancia: 1/2
+Tempo (ms): 6
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: A*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 2
+Nos gerados: 12
+Nos expandidos: 6
+Penetrancia: 1/4
+Tempo (ms): 20
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: IDA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 10/7
+Nos gerados: 10
+Nos expandidos: 7
+Penetrancia: 1/5
+Tempo (ms): 17
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: IDA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 34/21
+Nos gerados: 34
+Nos expandidos: 21
+Penetrancia: 3/34
+Tempo (ms): 50
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: IDA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 10/7
+Nos gerados: 10
+Nos expandidos: 7
+Penetrancia: 1/5
+Tempo (ms): 16
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: IDA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 34/21
+Nos gerados: 34
+Nos expandidos: 21
+Penetrancia: 3/34
+Tempo (ms): 49
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: SMA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 2
+Nos gerados: 4
+Nos expandidos: 2
+Penetrancia: 1/2
+Tempo (ms): 8
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: SMA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 8/3
+Nos gerados: 8
+Nos expandidos: 3
+Penetrancia: 3/8
+Tempo (ms): 12
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: SMA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 1 1 0) (NIL NIL 0 1 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 2
+Nos gerados: 4
+Nos expandidos: 2
+Penetrancia: 1/2
+Tempo (ms): 7
+Caminho: ((CL 5 6) (CB 5 4))
+
+
+
+--- Solucao Encontrada ---
+Algoritmo: SMA*
+Tabuleiro: ((NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL) (0 0 0 0 0 0 0) (0 0 0 1 0 0 0) (0 0 0 1 1 1 0) (NIL NIL 0 0 0 NIL NIL) (NIL NIL 0 0 0 NIL NIL))
+
+--- Estatisticas ---
+Fator de ramificacao: 8/3
+Nos gerados: 8
+Nos expandidos: 3
+Penetrancia: 3/8
+Tempo (ms): 12
+Caminho: ((CB 4 4) (CL 5 6) (CB 5 4))
+
+
+
